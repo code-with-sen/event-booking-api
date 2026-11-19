@@ -6,13 +6,28 @@ type Phase = 'idle' | 'setup' | 'racing' | 'done' | 'error';
 
 interface Attempt {
   buyer: number;
-  state: 'waiting' | 'pending' | 'won' | 'lost' | 'error';
+  state: 'waiting' | 'ready' | 'pending' | 'won' | 'lost' | 'error';
   ms?: number;
   order?: number;
   message?: string;
 }
 
 const PASSWORD = 'race-demo-password';
+const SIGNUP_CONCURRENCY = 4;
+
+/** Runs fn(0..count-1) with at most `limit` calls in flight, keeping results in order. */
+async function mapWithConcurrency<T>(count: number, limit: number, fn: (i: number) => Promise<T>): Promise<T[]> {
+  const results = new Array<T>(count);
+  let next = 0;
+  async function worker() {
+    while (next < count) {
+      const i = next++;
+      results[i] = await fn(i);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, count) }, worker));
+  return results;
+}
 
 function randomId() {
   return Math.random().toString(36).slice(2, 8);
@@ -62,17 +77,18 @@ export function RacePage() {
 
       // 2. One account per buyer, because each user can hold only one active booking per event.
       setStep(`Signing up ${buyers} buyers`);
-      const tokens = await Promise.all(
-        Array.from({ length: buyers }, async (_, i) => {
-          const { token } = await api.register({
-            email: `race-${runId}-buyer${i + 1}@example.com`,
-            name: `Buyer ${i + 1}`,
-            password: PASSWORD,
-          });
-          setRegistered((n) => n + 1);
-          return token;
-        }),
-      );
+      // Sign-ups hash passwords with bcrypt, which is CPU-heavy, so do a few at a time to be kind to
+      // the free-tier server. Only the bookings below need to arrive at the same moment.
+      const tokens = await mapWithConcurrency(buyers, SIGNUP_CONCURRENCY, async (i) => {
+        const { token } = await api.register({
+          email: `race-${runId}-buyer${i + 1}@example.com`,
+          name: `Buyer ${i + 1}`,
+          password: PASSWORD,
+        });
+        setRegistered((n) => n + 1);
+        setAttempts((prev) => prev.map((a, j) => (j === i ? { ...a, state: 'ready' } : a)));
+        return token;
+      });
 
       // 3. Fire every booking request in the same tick.
       setStep(`Firing ${buyers} booking requests at once`);
@@ -236,6 +252,7 @@ export function RacePage() {
                 <span className="tile-buyer">Buyer {a.buyer}</span>
                 <span className="tile-result">
                   {a.state === 'waiting' && 'Signing up'}
+                  {a.state === 'ready' && 'Ready'}
                   {a.state === 'pending' && 'Booking…'}
                   {a.state === 'won' && '201 Seat'}
                   {a.state === 'lost' && '409 Sold out'}

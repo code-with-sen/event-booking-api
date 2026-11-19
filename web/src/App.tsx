@@ -21,7 +21,7 @@ function useServerState() {
     const slow = setTimeout(() => !done && setState('waking'), 2500);
     const attempt = async (triesLeft: number): Promise<void> => {
       try {
-        await api.health();
+        await api.ping();
         done = true;
         setState('up');
       } catch {

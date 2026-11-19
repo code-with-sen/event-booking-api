@@ -820,3 +820,6 @@ textarea.input {
 .verdict .meter-label span {
   color: inherit;
 }
+.tile-ready {
+  border-color: var(--accent);
+}
