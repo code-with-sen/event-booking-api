@@ -96,7 +96,9 @@ export async function request<T>(
 type Token = string | null;
 
 export const api = {
-  health: () => request<{ status: string; database: string }>('/health'),
+  // Used to detect a sleeping server. Render's edge doesn't serve the health-check path to
+  // cross-origin browser requests, so ping a cheap public API route instead.
+  ping: () => request<Paginated<Event>>('/api/v1/events?limit=1'),
 
   register: (body: { email: string; name: string; password: string }) =>
     request<{ user: User; token: string }>('/api/v1/auth/register', { method: 'POST', body }),
