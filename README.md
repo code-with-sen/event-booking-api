@@ -5,10 +5,25 @@
 ![Node.js](https://img.shields.io/badge/Node.js-22-339933?logo=nodedotjs&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-blue)
+[![Live demo](https://img.shields.io/badge/live%20demo-onrender.com-46E3B7?logo=render&logoColor=white)](https://event-booking-api-l53d.onrender.com)
 
 A REST API for creating events and booking seats, built with **TypeScript, Express and PostgreSQL**.
 
 The core problem it solves: when many people try to book the last few seats at the same moment, **the event must never be overbooked**. Bookings run inside a Postgres transaction with a row lock, and a `CHECK` constraint backs it up at the database level. A test fires 20 concurrent requests at an event with 5 seats and asserts that exactly 5 succeed.
+
+## Live demo
+
+**Base URL:** https://event-booking-api-l53d.onrender.com
+
+| Try it | URL |
+|---|---|
+| API overview | [/](https://event-booking-api-l53d.onrender.com/) |
+| Health check (API + database) | [/health](https://event-booking-api-l53d.onrender.com/health) |
+| Upcoming events | [/api/v1/events](https://event-booking-api-l53d.onrender.com/api/v1/events) |
+
+> Hosted on Render's free tier, so the first request after 15 minutes of inactivity can take up to a minute while the server wakes up. The database is a free Neon Postgres instance.
+
+The [example requests](#example) below run against the live demo by default, so you can register, create events and book seats right away.
 
 ## Features
 
@@ -158,18 +173,20 @@ Every error uses the same shape:
 ### Example
 
 ```bash
+BASE=https://event-booking-api-l53d.onrender.com   # or http://localhost:3000
+
 # Register and grab the token
-TOKEN=$(curl -s -X POST localhost:3000/api/v1/auth/register \
+TOKEN=$(curl -s -X POST $BASE/api/v1/auth/register \
   -H 'Content-Type: application/json' \
   -d '{"email":"me@example.com","name":"Me","password":"password123"}' | jq -r .token)
 
 # Create an event
-curl -s -X POST localhost:3000/api/v1/events \
+curl -s -X POST $BASE/api/v1/events \
   -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
   -d '{"title":"TypeScript Meetup","venue":"Bengaluru","startsAt":"2027-01-15T18:00:00Z","capacity":50}'
 
 # Book 2 seats
-curl -s -X POST localhost:3000/api/v1/events/1/bookings \
+curl -s -X POST $BASE/api/v1/events/1/bookings \
   -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"seats":2}'
 ```
 
@@ -202,6 +219,14 @@ The tests run against a real Postgres database (`event_booking_test` by default)
 createdb event_booking_test
 npm test                      # or: npm test -- --coverage
 ```
+
+## Deployment
+
+The live demo runs as a free Docker web service on [Render](https://render.com), defined in [`render.yaml`](render.yaml), with a free [Neon](https://neon.com) Postgres database.
+
+1. Create a Neon project and copy its **direct** (non-pooled) connection string.
+2. In Render, create a **Blueprint** from this repo and paste the string as `DATABASE_URL`. Render generates `JWT_SECRET` automatically.
+3. On every start, the container applies pending migrations and then launches the API.
 
 ## Scripts
 
