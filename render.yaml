@@ -1,5 +1,6 @@
 # Render Blueprint: free web service built from the Dockerfile.
 # The database is a free Neon Postgres instance; paste its connection string as DATABASE_URL.
+# The web frontend in /web is deployed as a free static site next to it.
 services:
   - type: web
     name: event-booking-api
@@ -16,3 +17,15 @@ services:
         generateValue: true
       - key: JWT_EXPIRES_IN
         value: 1h
+
+  - type: web
+    name: event-booking-web
+    runtime: static
+    rootDir: web
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    autoDeploy: true
+    envVars:
+      # Public URL of the API service above, baked in at build time.
+      - key: VITE_API_URL
+        value: https://event-booking-api-l53d.onrender.com

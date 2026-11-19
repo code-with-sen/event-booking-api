@@ -9,6 +9,12 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
   JWT_EXPIRES_IN: z.string().default('1h'),
+  // Comma-separated list of origins allowed to call the API from a browser, or * for any.
+  // Auth uses bearer tokens, not cookies, so * is safe; set it to the frontend URL to be strict.
+  CORS_ORIGINS: z
+    .string()
+    .default('*')
+    .transform((v) => (v.trim() === '*' ? '*' : v.split(',').map((o) => o.trim()).filter(Boolean))),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
 });
 
