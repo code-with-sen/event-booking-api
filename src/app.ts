@@ -1,6 +1,8 @@
+import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
+import { env } from './config/env';
 import { logger } from './config/logger';
 import { pool } from './db/pool';
 import { errorHandler, notFoundHandler } from './middleware/error-handler';
@@ -13,6 +15,7 @@ export function createApp() {
 
   app.disable('x-powered-by');
   app.use(helmet());
+  app.use(cors({ origin: env.CORS_ORIGINS, maxAge: 600 }));
   app.use(express.json({ limit: '100kb' }));
   app.use(pinoHttp({ logger }));
 
