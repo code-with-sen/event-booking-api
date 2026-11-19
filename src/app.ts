@@ -3,6 +3,8 @@ import helmet from 'helmet';
 import pinoHttp from 'pino-http';
 import { logger } from './config/logger';
 import { pool } from './db/pool';
+import { errorHandler, notFoundHandler } from './middleware/error-handler';
+import { authRouter } from './modules/auth/auth.routes';
 
 export function createApp() {
   const app = express();
@@ -20,6 +22,11 @@ export function createApp() {
       res.status(503).json({ status: 'degraded', database: 'down' });
     }
   });
+
+  app.use('/api/v1/auth', authRouter);
+
+  app.use(notFoundHandler);
+  app.use(errorHandler);
 
   return app;
 }
