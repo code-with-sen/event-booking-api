@@ -5,6 +5,7 @@ import { logger } from './config/logger';
 import { pool } from './db/pool';
 import { errorHandler, notFoundHandler } from './middleware/error-handler';
 import { authRouter } from './modules/auth/auth.routes';
+import { bookingsRouter, eventBookingsRouter } from './modules/bookings/bookings.routes';
 import { eventsRouter } from './modules/events/events.routes';
 
 export function createApp() {
@@ -25,7 +26,9 @@ export function createApp() {
   });
 
   app.use('/api/v1/auth', authRouter);
+  app.use('/api/v1/events/:id/bookings', eventBookingsRouter);
   app.use('/api/v1/events', eventsRouter);
+  app.use('/api/v1/bookings', bookingsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
