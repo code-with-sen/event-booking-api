@@ -5,6 +5,7 @@ import { logger } from './config/logger';
 import { pool } from './db/pool';
 import { errorHandler, notFoundHandler } from './middleware/error-handler';
 import { authRouter } from './modules/auth/auth.routes';
+import { eventsRouter } from './modules/events/events.routes';
 
 export function createApp() {
   const app = express();
@@ -24,6 +25,7 @@ export function createApp() {
   });
 
   app.use('/api/v1/auth', authRouter);
+  app.use('/api/v1/events', eventsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
