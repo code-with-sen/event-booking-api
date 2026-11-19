@@ -19,7 +19,7 @@ COPY migrations ./migrations
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
-  CMD wget -qO- http://localhost:3000/health || exit 1
+  CMD wget -qO- "http://localhost:${PORT:-3000}/health" || exit 1
 
 # Apply pending migrations, then start the API.
 CMD ["sh", "-c", "npm run migrate:up && node dist/server.js"]

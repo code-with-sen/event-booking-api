@@ -16,6 +16,27 @@ export function createApp() {
   app.use(express.json({ limit: '100kb' }));
   app.use(pinoHttp({ logger }));
 
+  // Landing response so visitors opening the base URL see what the API offers.
+  app.get('/', (_req, res) => {
+    res.json({
+      name: 'event-booking-api',
+      description: 'Concurrency-safe event booking REST API (TypeScript, Express, PostgreSQL)',
+      source: 'https://github.com/code-with-sen/event-booking-api',
+      health: '/health',
+      endpoints: {
+        register: 'POST /api/v1/auth/register',
+        login: 'POST /api/v1/auth/login',
+        me: 'GET /api/v1/auth/me',
+        listEvents: 'GET /api/v1/events',
+        getEvent: 'GET /api/v1/events/:id',
+        createEvent: 'POST /api/v1/events',
+        bookSeats: 'POST /api/v1/events/:id/bookings',
+        myBookings: 'GET /api/v1/bookings/me',
+        cancelBooking: 'POST /api/v1/bookings/:id/cancel',
+      },
+    });
+  });
+
   app.get('/health', async (_req, res) => {
     try {
       await pool.query('SELECT 1');

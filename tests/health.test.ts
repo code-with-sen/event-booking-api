@@ -10,6 +10,12 @@ describe('GET /health', () => {
     expect(res.body).toEqual({ status: 'ok', database: 'up' });
   });
 
+  it('describes the API at the root URL', async () => {
+    const res = await request(app).get('/').expect(200);
+    expect(res.body.name).toBe('event-booking-api');
+    expect(res.body.endpoints.listEvents).toBe('GET /api/v1/events');
+  });
+
   it('returns a JSON 404 for unknown routes', async () => {
     const res = await request(app).get('/nope').expect(404);
     expect(res.body.error.code).toBe('NOT_FOUND');
