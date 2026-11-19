@@ -34,9 +34,28 @@ The [example requests](#example) below run against the live demo by default, so 
 - **Input validation** on every request with zod, returning field-level errors
 - **SQL migrations** with node-pg-migrate (up and down)
 - **Consistent error format** and mapping of Postgres constraint errors to `409 Conflict`
-- **25 integration tests** (Jest + Supertest) against a real Postgres, ~96% statement coverage
+- **27 integration tests** (Jest + Supertest) against a real Postgres, ~96% statement coverage
 - **CI** on every push (typecheck → build → migrate → test → Docker build)
 - **Docker**: multi-stage image and docker-compose for one-command local setup
+- **Web frontend** (React + Vite, in [`web/`](web)) with a live **race demo** that fires 20 concurrent bookings at a 5-seat event and shows exactly 5 succeed
+
+## Web frontend
+
+The [`web/`](web) folder holds a small React + TypeScript app (Vite, no UI framework) for trying the API in a browser:
+
+- **Events**: browse and search upcoming events, see seats left
+- **Event page**: book 1–10 seats or cancel; organizers also see the attendee list and can delete the event
+- **Create event** and **My bookings**
+- **Race demo**: signs up N buyers, sends all N booking requests at the same instant to an event with fewer seats, and shows each request's result (201 or 409), its timing, and the final seat count read back from the database
+
+```bash
+# with the API running on http://localhost:3000
+cd web
+npm install
+npm run dev        # http://localhost:5173 (proxies /api to the local API)
+```
+
+For a production build, set `VITE_API_URL` to the API's public URL (see [`web/.env.example`](web/.env.example)) and run `npm run build`; the output in `web/dist` is plain static files. The API allows cross-origin requests from any origin by default because auth uses bearer tokens, not cookies; set `CORS_ORIGINS` to a comma-separated list to restrict it.
 
 ## Architecture
 
@@ -227,6 +246,7 @@ The live demo runs as a free Docker web service on [Render](https://render.com),
 1. Create a Neon project and copy its **direct** (non-pooled) connection string.
 2. In Render, create a **Blueprint** from this repo and paste the string as `DATABASE_URL`. Render generates `JWT_SECRET` automatically.
 3. On every start, the container applies pending migrations and then launches the API.
+4. The same blueprint deploys the frontend as a free static site (`event-booking-web`), built with `VITE_API_URL` pointing at the API.
 
 ## Scripts
 
@@ -261,6 +281,7 @@ src/
     events/              events CRUD + attendee list
     bookings/            booking + cancellation
 migrations/              SQL migrations
+web/                     React + Vite frontend, including the race demo
 tests/                   Jest + Supertest integration tests
 ```
 
