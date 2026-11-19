@@ -5,7 +5,10 @@
 ![Node.js](https://img.shields.io/badge/Node.js-22-339933?logo=nodedotjs&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-blue)
-[![Live demo](https://img.shields.io/badge/live%20demo-onrender.com-46E3B7?logo=render&logoColor=white)](https://event-booking-api-l53d.onrender.com)
+[![Frontend](https://img.shields.io/badge/frontend-live-46E3B7?logo=render&logoColor=white)](https://event-booking-web-cm99.onrender.com)
+[![API](https://img.shields.io/badge/API-live-46E3B7?logo=render&logoColor=white)](https://event-booking-api-l53d.onrender.com)
+
+**Live links:** [Frontend (try the app)](https://event-booking-web-cm99.onrender.com) · [Backend API](https://event-booking-api-l53d.onrender.com)
 
 A REST API for creating events and booking seats, built with **TypeScript, Express and PostgreSQL**.
 
@@ -13,7 +16,11 @@ The core problem it solves: when many people try to book the last few seats at t
 
 ## Live demo
 
-**Base URL:** https://event-booking-api-l53d.onrender.com
+| | Link |
+|---|---|
+| **Frontend** (browse events, book seats, race demo) | https://event-booking-web-cm99.onrender.com |
+| **Race demo** (20 buyers, 5 seats, all at once) | https://event-booking-web-cm99.onrender.com/#/race |
+| **Backend API** base URL | https://event-booking-api-l53d.onrender.com |
 
 | Try it | URL |
 |---|---|
